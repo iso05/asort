@@ -1,5 +1,5 @@
 1:"$Sreact.fragment"
 2:I[97367,["/asort/_next/static/chunks/ff1a16fafef87110.js","/asort/_next/static/chunks/d2be314c3ece3fbe.js"],"OutletBoundary"]
 3:"$Sreact.suspense"
-0:{"buildId":"qx3oNlEjRtZHpkHkBXzta","rsc":["$","$1","c",{"children":[["$","div",null,{"children":"Partners"}],null,["$","$L2",null,{"children":["$","$3",null,{"name":"Next.MetadataOutlet","children":"$@4"}]}]]}],"loading":null,"isPartial":false}
+0:{"buildId":"egNpgRcEvPe0yze1WSzk0","rsc":["$","$1","c",{"children":[["$","div",null,{"children":"Partners"}],null,["$","$L2",null,{"children":["$","$3",null,{"name":"Next.MetadataOutlet","children":"$@4"}]}]]}],"loading":null,"isPartial":false}
 4:null
