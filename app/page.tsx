@@ -1,6 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useHomeColor } from '@/components/HomeColorContext'
 
 // ─── Product Data ────────────────────────────────────────────────────────────
 const products = [
@@ -11,7 +13,7 @@ const products = [
     weight: '1 KG / 5 KG',
     origin: 'PREMIUM GRADE',
     color: 'BLUE / WHITE',
-    bg: '#1A3A5C',
+    bg: '#3B7FBF',
     accent: '#2D6FBF',
     text: '#93C5FD',
     emoji: '🟦',
@@ -26,7 +28,7 @@ const products = [
     weight: '2 KG / 10 KG',
     origin: 'PREMIUM GRADE',
     color: 'GREEN / IVORY',
-    bg: '#1A3D1A',
+    bg: '#3D7F3D',
     accent: '#2E7D2E',
     text: '#86EFAC',
     emoji: '🟩',
@@ -41,7 +43,7 @@ const products = [
     weight: '0.9 KG / 4 KG',
     origin: 'PREMIUM GRADE',
     color: 'BLACK / GOLD',
-    bg: '#111111',
+    bg: '#3D3D3D',
     accent: '#3D3D3D',
     text: '#D1D5DB',
     emoji: '⬛',
@@ -56,7 +58,7 @@ const products = [
     weight: '1 KG / 5 KG',
     origin: 'PREMIUM GRADE',
     color: 'ORANGE / RUST',
-    bg: '#7C2D12',
+    bg: '#C27F3D',
     accent: '#C2410C',
     text: '#FED7AA',
     emoji: '🟧',
@@ -152,7 +154,18 @@ function PackageVisual({
 export default function AsortHomePage() {
   const [active, setActive] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
+  const router = useRouter()
+  const { setHomeColor } = useHomeColor()
   const product = products[active]
+
+  // Update navbar color when product changes
+  useEffect(() => {
+    setHomeColor({
+      bg: product.bg,
+      accent: product.accent,
+      text: product.text,
+    })
+  }, [active, setHomeColor])
 
   return (
     <div
@@ -280,7 +293,7 @@ export default function AsortHomePage() {
               className="text-white/30 text-[10px] tracking-[0.3em] uppercase mb-3"
               style={{ fontFamily: "'Barlow', sans-serif" }}
             >
-              SELECT SIZE (KG)
+              SIZE Range (KG)
             </p>
             <div className="flex flex-wrap gap-2">
               {['0.5', '1', '2', '5', '10'].map((s) => (
@@ -310,17 +323,48 @@ export default function AsortHomePage() {
                   className={`thumb-btn ${i === active ? 'active-thumb' : ''}`}
                   onClick={() => setActive(i)}
                   title={p.name}
+                  style={{
+                    width: 60,
+                    height: 60,
+                    padding: 0,
+                    borderRadius: 10,
+                    overflow: 'hidden',
+                    border:
+                      i === active
+                        ? `2px solid ${p.text}`
+                        : '2px solid rgba(255,255,255,0.2)',
+                    background: 'transparent',
+                    transition: 'transform 0.2s, border 0.2s',
+                    cursor: 'pointer',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.08)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)'
+                  }}
                 >
-                  <PackageVisual product={p} size="small" />
+                  <img
+                    src={`/images/product-${i + 1}.png`}
+                    alt={p.name}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                    }}
+                    onError={(e) => {
+                      ;(e.target as HTMLImageElement).style.display = 'none'
+                    }}
+                  />
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        {/* CENTER — package + giant wordmark */}
+        {/* CENTER — single large image */}
         <div
-          className="relative flex-1 flex items-center justify-center"
+          className="relative flex-1 flex flex-col items-center justify-center gap-8"
           style={{ minHeight: 380 }}
         >
           <div
@@ -332,7 +376,7 @@ export default function AsortHomePage() {
               style={{
                 fontSize: 'clamp(120px, 18vw, 220px)',
                 lineHeight: 1,
-                opacity: 0.06,
+                opacity: 0.08,
                 letterSpacing: '-0.02em',
                 transform: 'translateY(10px)',
               }}
@@ -340,18 +384,21 @@ export default function AsortHomePage() {
               ASORT
             </span>
           </div>
-          <div
-            key={`pkg-${active}`}
+          <img
+            src={`/images/product-${active + 1}.png`}
+            alt={product.name}
             style={{
-              animation: 'fadeUp .5s ease forwards',
-              filter: 'drop-shadow(0 30px 60px rgba(0,0,0,0.6))',
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
             }}
-          >
-            <PackageVisual product={product} size="large" />
-          </div>
+            onError={(e) => {
+              ;(e.target as HTMLImageElement).style.display = 'none'
+            }}
+          />
         </div>
 
-        {/* RIGHT — description + arrows (no cart, no price) */}
+        {/* RIGHT — description + arrows + image cards */}
         <div
           className="flex-1 max-w-xs text-right hidden md:flex flex-col items-end gap-6"
           key={`right-${active}`}
@@ -365,7 +412,8 @@ export default function AsortHomePage() {
           </p>
 
           <button
-            className="flex items-center gap-2 text-white/60 hover:text-white transition-colors text-[11px] tracking-[0.3em] uppercase"
+            onClick={() => router.push('/about')}
+            className="flex items-center gap-2 text-white/60 hover:text-white transition-colors text-[11px] tracking-[0.3em] uppercase cursor-pointer"
             style={{ fontFamily: "'Barlow', sans-serif" }}
           >
             <span>► LEARN MORE</span>
@@ -399,8 +447,6 @@ export default function AsortHomePage() {
         style={{ fontFamily: "'Barlow', sans-serif" }}
       >
         <span>© 2025 ASORT</span>
-        <span>PREMIUM FOOD PRODUCTS</span>
-        <span>EST. 2025</span>
       </div>
     </div>
   )
