@@ -3,33 +3,36 @@
 import {
   createContext,
   useContext,
-  useState,
-  useEffect,
   ReactNode,
 } from 'react'
+import { useParams, useRouter, usePathname } from 'next/navigation'
 
-type Language = 'en' | 'ru' | 'uz'
+type Language = 'uz' | 'ru' | 'en'
 
 const LanguageContext = createContext<{
   language: Language
   setLanguage: (lang: Language) => void
 }>({
-  language: 'en',
+  language: 'uz',
   setLanguage: () => {},
 })
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>('en')
+  const params = useParams()
+  const router = useRouter()
+  const pathname = usePathname()
 
-  // Persist to localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('asort-language') as Language | null
-    if (saved) setLanguage(saved)
-  }, [])
+  const routeLocale = params?.locale as Language | undefined
+  const language = routeLocale || 'uz'
 
   const updateLanguage = (lang: Language) => {
-    setLanguage(lang)
-    localStorage.setItem('asort-language', lang)
+    const segments = pathname.split('/')
+    if (segments.length > 1 && ['uz', 'ru', 'en'].includes(segments[1])) {
+      segments[1] = lang
+    } else {
+      segments.splice(1, 0, lang)
+    }
+    router.push(segments.join('/'))
   }
 
   return (

@@ -1,543 +1,341 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
 import { useTheme } from '@/components/ThemeContext'
+import { useLanguage } from '@/components/LanguageContext'
+import { FaTelegramPlane, FaInstagram } from 'react-icons/fa'
 
-const PRODUCTS = [
-  { name: 'Crystal White Sugar', href: '/products' },
-  { name: 'Long Grain Rice', href: '/products' },
-  { name: 'Roasted Buckwheat', href: '/products' },
-  { name: 'Red Split Lentils', href: '/products' },
-  { name: 'Whole Chickpeas', href: '/products' },
-  { name: 'Sunflower Oil', href: '/products' },
-]
-
-const COMPANY = [
-  { name: 'About Us', href: '/about' },
-  { name: 'Products', href: '/products' },
-  { name: 'News', href: '/news' },
-  { name: 'Partners', href: '/partners' },
-  { name: 'Contact', href: '/contact' },
-]
-
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────────────────────────────────────
 const CONTACT = [
-  { icon: '✉', label: 'info@asort.com' },
-  { icon: '✉', label: 'sales@asort.com' },
-  { icon: '☎', label: '+998 90 123 45 67' },
-  { icon: '⌖', label: 'Tashkent, Uzbekistan' },
+  { label: 'info@asort.uz',        href: 'mailto:info@asort.uz'     },
+  { label: '+998 99 010 04 90',    href: 'tel:+998990100490'        },
+  { label: 'Telegram: @asortuz',   href: 'https://t.me/asortuz'     },
+  { label: 'Instagram: @asort.uz', href: 'https://instagram.com/asort.uz' },
+  { label: "Toshkent, O'zbekiston", href: null                       },
 ]
 
 const SOCIALS = [
-  { label: 'LinkedIn', href: '#', abbr: 'LI' },
-  { label: 'Instagram', href: '#', abbr: 'IG' },
-  { label: 'Twitter', href: '#', abbr: 'TW' },
+  {
+    label: 'Telegram',
+    href: 'https://t.me/asortuz',
+    icon: (size: number) => <FaTelegramPlane size={size} />,
+  },
+  {
+    label: 'Instagram',
+    href: 'https://instagram.com/asort.uz',
+    icon: (size: number) => <FaInstagram size={size} />,
+  },
 ]
 
-// ── Theme tokens ──────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// TOKENS
+// ─────────────────────────────────────────────────────────────────────────────
 const DARK = {
-  footerBg: 'linear-gradient(135deg, #0F1729 0%, #1a2a4e 100%)',
-  topBandBg: 'linear-gradient(135deg, #1a2a4e 0%, #0F1729 100%)',
-  topBandBorder: 'rgba(100,200,255,0.15)',
-  borderThin: 'rgba(100,200,255,0.12)',
-  divider:
-    'linear-gradient(90deg, transparent, rgba(100,200,255,0.20) 30%, rgba(100,200,255,0.20) 70%, transparent)',
-  brandText: '#E8F1FF',
-  brandSub: 'rgba(100,200,255,0.32)',
-  brandReg: 'rgba(100,200,255,0.28)',
-  brandDivider: 'rgba(100,200,255,0.20)',
-  accent: '#64C8FF',
-  accentHov: '#85D8FF',
-  linkColor: 'rgba(168,210,255,0.48)',
-  linkHov: 'rgba(168,210,255,0.90)',
-  bodyText: 'rgba(168,210,255,0.55)',
-  dimText: 'rgba(168,210,255,0.35)',
-  veryDim: 'rgba(168,210,255,0.25)',
-  iconColor: 'rgba(100,200,255,0.50)',
-  socialBorder: 'rgba(100,200,255,0.18)',
-  socialBg: 'rgba(100,200,255,0.08)',
-  socialText: 'rgba(100,200,255,0.60)',
-  inputBg: 'rgba(100,200,255,0.06)',
-  inputBorder: 'rgba(100,200,255,0.18)',
-  inputBorderErr: 'rgba(255,80,80,0.5)',
-  inputText: '#E8F1FF',
-  inputPlaceholder: 'rgba(168,210,255,0.35)',
-  cardBg: 'rgba(100,200,255,0.05)',
-  cardBorder: 'rgba(100,200,255,0.12)',
-  hoursLabel: 'rgba(100,200,255,0.40)',
-  hoursText: 'rgba(168,210,255,0.55)',
-  badgeBg: 'rgba(100,200,255,0.08)',
-  badgeBorder: 'rgba(100,200,255,0.15)',
-  badgeText: 'rgba(168,210,255,0.50)',
-  statNum: '#64C8FF',
-  statLabel: 'rgba(100,200,255,0.35)',
-  tagline: 'rgba(168,210,255,0.28)',
-  formPanelBg: 'rgba(100,200,255,0.04)',
-  formPanelBorder: 'rgba(100,200,255,0.12)',
-  successBg: 'rgba(80,200,120,0.15)',
-  successBorder: 'rgba(80,200,120,0.35)',
-  successText: 'rgba(168,210,255,0.70)',
-  errorText: 'rgba(255,100,100,0.90)',
+  bg:           '#070E17',
+  topBorder:    'rgba(91,184,212,0.18)',
+  divider:      'rgba(91,184,212,0.08)',
+  brand:        '#E4F0F5',
+  accent:       '#5BB8D4',
+  text:         '#4A7A90',
+  textHov:      '#E4F0F5',
+  dim:          'rgba(91,184,212,0.28)',
+  // Social icons — distinct from accent so they stand apart
+  socialBg:     'rgba(91,184,212,0.07)',
+  socialBorder: 'rgba(91,184,212,0.20)',
+  socialIcon:   '#5BB8D4',
+  socialHovBg:  'rgba(91,184,212,0.16)',
+  socialHovBorder: '#5BB8D4',
+  socialHovIcon:   '#E4F0F5',
 }
 
 const LIGHT = {
-  footerBg: '#FFFFFF',
-  topBandBg: 'linear-gradient(135deg, #FFFFFF 0%, #F8FBFF 100%)',
-  topBandBorder: 'rgba(100,150,200,0.15)',
-  borderThin: 'rgba(100,150,200,0.12)',
-  divider:
-    'linear-gradient(90deg, transparent, rgba(100,150,200,0.15) 30%, rgba(100,150,200,0.15) 70%, transparent)',
-  brandText: '#1a1f3a',
-  brandSub: '#6b7a9e',
-  brandReg: '#8b96b5',
-  brandDivider: 'rgba(100,150,200,0.20)',
-  accent: '#2c5aa0',
-  accentHov: '#1a3a70',
-  linkColor: '#4a5f8f',
-  linkHov: '#1a1f3a',
-  bodyText: '#3a4a6f',
-  dimText: '#7a8aaf',
-  veryDim: '#9ba5bf',
-  iconColor: '#2c5aa0',
-  socialBorder: 'rgba(100,150,200,0.18)',
-  socialBg: 'rgba(100,150,200,0.06)',
-  socialText: '#6b7a9e',
-  inputBg: '#F5F7FB',
-  inputBorder: 'rgba(100,150,200,0.22)',
-  inputBorderErr: 'rgba(220,38,38,0.5)',
-  inputText: '#1a1f3a',
-  inputPlaceholder: '#8b96b5',
-  cardBg: 'rgba(100,150,200,0.05)',
-  cardBorder: 'rgba(100,150,200,0.12)',
-  hoursLabel: '#8b96b5',
-  hoursText: '#4a5f8f',
-  badgeBg: 'rgba(100,150,200,0.08)',
-  badgeBorder: 'rgba(100,150,200,0.14)',
-  badgeText: '#4a5f8f',
-  statNum: '#2c5aa0',
-  statLabel: '#8b96b5',
-  tagline: '#8b96b5',
-  formPanelBg: 'rgba(100,150,200,0.04)',
-  formPanelBorder: 'rgba(100,150,200,0.12)',
-  successBg: 'rgba(46,122,62,0.10)',
-  successBorder: 'rgba(46,122,62,0.25)',
-  successText: '#3a6f3a',
-  errorText: 'rgba(220,38,38,0.9)',
+  bg:           '#FAF6EE',
+  topBorder:    '#E6E1D8',
+  divider:      '#E6E1D8',
+  brand:        '#1E2520',
+  accent:       '#2D5F3E',
+  text:         '#505A53',
+  textHov:      '#1E2520',
+  dim:          '#869389',
+  socialBg:     'rgba(45, 95, 62, 0.05)',
+  socialBorder: 'rgba(45, 95, 62, 0.18)',
+  socialIcon:   '#2D5F3E',
+  socialHovBg:  '#2D5F3E',
+  socialHovBorder: '#2D5F3E',
+  socialHovIcon:   '#FAF6EE',
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// TRANSLATIONS
+// ─────────────────────────────────────────────────────────────────────────────
+const footerTranslations = {
+  uz: {
+    description: "Markaziy Osiyodagi hamkor xo'jaliklardan keltiriladigan yuqori sifatli oziq-ovqat mahsulotlari — sertifikatlangan va 1000 dan ortiq mamnun mijozlar hamda distribyutorlar ishonchini qozongan.",
+    products: "Mahsulotlar",
+    company: "Kompaniya",
+    contact: "Aloqa",
+    rights: "Asort MChJ. Barcha huquqlar himoyalangan.",
+    about: "Biz haqimizda",
+    partners: "Hamkorlar",
+    news: "Yangiliklar",
+    productList: ['Rossiya shakari', 'Grechka yormasi', 'Alanga guruch'],
+  },
+  ru: {
+    description: "Высококачественные продукты питания от партнерских хозяйств Центральной Азии — сертифицированы и пользуются доверием более 1000 довольных клиентов и дистрибьюторов.",
+    products: "Продукты",
+    company: "Компания",
+    contact: "Контакты",
+    rights: "ООО Asort. Все права защищены.",
+    about: "О нас",
+    partners: "Партнеры",
+    news: "Новости",
+    productList: ['Российский сахар', 'Гречневая крупа', 'Рис Аланга'],
+  },
+  en: {
+    description: "High-quality food products sourced from partner farms in Central Asia — certified and trusted by over 1000 happy clients and distributors.",
+    products: "Products",
+    company: "Company",
+    contact: "Contact",
+    rights: "Asort LLC. All rights reserved.",
+    about: "About Us",
+    partners: "Partners",
+    news: "News",
+    productList: ['Russian sugar', 'Buckwheat', 'Alanga rice'],
+  },
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FOOTER
+// ─────────────────────────────────────────────────────────────────────────────
 export default function Footer() {
   const { theme } = useTheme()
+  const { language } = useLanguage()
   const T = theme === 'dark' ? DARK : LIGHT
 
-  const [email, setEmail] = useState('')
-  const [subbed, setSubbed] = useState(false)
-  const [subError, setSubError] = useState(false)
-
-  const handleSub = () => {
-    if (!email.includes('@')) {
-      setSubError(true)
-      return
-    }
-    setSubbed(true)
-    setSubError(false)
+  const getLocalizedHref = (href: string) => {
+    return `/${language}${href}`
   }
 
+  const t = footerTranslations[language] || footerTranslations.uz
+
+  const NAV = [
+    { name: t.about,    href: '/about'    },
+    { name: t.products, href: '/products' },
+    { name: t.news,     href: '/news'     },
+    { name: t.partners, href: '/partners' },
+    { name: t.contact,  href: '/contact'  },
+  ]
+
   return (
-    <>
+    <footer style={{
+      background: T.bg,
+      borderTop: `1px solid ${T.topBorder}`,
+      transition: 'background 0.3s',
+    }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap');
+        *, *::before, *::after { box-sizing: border-box; }
 
+        /* Nav / contact links */
         .ft-link {
-          font-family: 'Barlow', sans-serif;
-          font-size: 12px; font-weight: 400;
-          color: ${T.linkColor};
+          font-family: 'DM Sans', sans-serif;
+          font-size: 12.5px;
+          font-weight: 400;
+          color: ${T.text};
           text-decoration: none;
-          display: block; padding: 4px 0;
-          transition: color 0.18s ease;
-          line-height: 1.6;
+          display: block;
+          padding: 3.5px 0;
+          line-height: 1.65;
+          transition: color 0.14s;
         }
-        .ft-link:hover { color: ${T.linkHov}; }
+        .ft-link:hover { color: ${T.textHov}; }
 
-        .social-btn {
-          width: 36px; height: 36px; border-radius: 10px;
+        /* Column labels */
+        .ft-label {
+          font-family: 'DM Sans', sans-serif;
+          font-size: 8.5px;
+          font-weight: 500;
+          letter-spacing: 0.34em;
+          text-transform: uppercase;
+          color: ${T.accent};
+          margin-bottom: 16px;
+          display: block;
+        }
+
+        /* Social icon button */
+        .ft-social {
+          width: 34px; height: 34px;
+          border-radius: 2px;
           border: 1px solid ${T.socialBorder};
           background: ${T.socialBg};
-          color: ${T.socialText};
-          font-family: 'Barlow', sans-serif; font-size: 9px;
-          font-weight: 600; letter-spacing: 0.08em;
-          cursor: pointer; transition: all 0.18s ease;
-          display: flex; align-items: center; justify-content: center;
+          color: ${T.socialIcon};
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
           text-decoration: none;
+          transition: background 0.16s, border-color 0.16s, color 0.16s, transform 0.16s;
+          cursor: pointer;
         }
-        .social-btn:hover {
-          border-color: #C47830;
-          background: rgba(196,120,48,0.12);
-          color: #C47830;
+        .ft-social:hover {
+          background: ${T.socialHovBg};
+          border-color: ${T.socialHovBorder};
+          color: ${T.socialHovIcon};
           transform: translateY(-2px);
         }
 
-        .nl-input {
-          flex: 1; border: none; background: transparent;
-          font-family: 'Barlow', sans-serif; font-size: 12px;
-          color: ${T.inputText}; padding: 11px 0;
-        }
-        .nl-input::placeholder { color: ${T.inputPlaceholder}; }
-        .nl-input:focus { outline: none; }
-
-        .nl-btn {
-          flex-shrink: 0;
-          padding: 8px 16px; border-radius: 8px;
-          background: #2c5aa0; border: none;
-          color: #fff; font-family: 'Barlow', sans-serif;
-          font-size: 9px; font-weight: 700;
-          letter-spacing: 0.2em; text-transform: uppercase;
-          cursor: pointer; transition: background 0.18s;
-          white-space: nowrap;
-        }
-        .nl-btn:hover { background: #1a3a70; }
-
-        @keyframes subIn {
-          from { opacity: 0; transform: scale(0.9); }
-          to   { opacity: 1; transform: scale(1); }
-        }
-        .sub-in { animation: subIn 0.3s cubic-bezier(.22,.68,0,1.2) forwards; }
-
+        /* Desktop: 4-col grid */
         .ft-grid {
           display: grid;
           grid-template-columns: 2fr 1fr 1fr 1.4fr;
-          gap: 48px;
+          gap: 0 52px;
         }
-        @media (max-width: 960px) {
-          .ft-grid { grid-template-columns: 1fr 1fr; gap: 36px 28px; }
+
+        /* Tablet: 3-col — Products hidden */
+        @media (max-width: 900px) {
+          .ft-grid {
+            grid-template-columns: 2fr 1fr 1.3fr;
+            gap: 0 36px;
+          }
+          .ft-products-col { display: none !important; }
         }
-        @media (max-width: 560px) {
-          .ft-grid { grid-template-columns: 1fr; gap: 28px; }
+
+        /* Mobile: 2-col — Brand spans full, Products hidden */
+        @media (max-width: 600px) {
+          .ft-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 40px 24px;
+          }
+          .ft-brand-col { grid-column: 1 / -1; }
+          .ft-products-col { display: none !important; }
         }
-        .ft-bottom {
-          display: flex; align-items: center; justify-content: space-between;
-          flex-wrap: wrap; gap: 12px;
+
+        /* Very small: single col */
+        @media (max-width: 380px) {
+          .ft-grid { grid-template-columns: 1fr; }
+          .ft-bottom-bar { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+        }
+
+        @media (max-width: 600px) {
+          .ft-bottom-bar { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; }
         }
       `}</style>
 
-      <footer
-        style={{
-          background: T.footerBg,
-          borderTop: `1px solid ${T.borderThin}`,
-          transition: 'background 0.3s ease',
-        }}
-      >
-        {/* ── TOP BAND ── */}
-        <div
-          style={{
-            background: T.topBandBg,
-            borderBottom: `1px solid ${T.topBandBorder}`,
-            padding: '16px 40px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: 14,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span
-              style={{
-                fontFamily: "'Barlow Condensed',sans-serif",
-                fontWeight: 900,
-                fontSize: 18,
-                color: T.brandText,
-                letterSpacing: '0.24em',
-              }}
-            >
-              ASORT
-            </span>
-            <span style={{ fontSize: 8, color: T.brandReg }}>®</span>
+      {/* ── MAIN GRID ── */}
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '56px 48px 48px' }}>
+        <div className="ft-grid">
+
+          {/* COL 1 — Brand */}
+          <div className="ft-brand-col" style={{ paddingRight: 8 }}>
+            {/* Logo image */}
+            <div style={{ marginBottom: 16 }}>
+              <img
+                src="/images/logo.webp"
+                alt="Asort Logo"
+                style={{
+                  height: 48,
+                  width: 'auto',
+                  maxHeight: 48,
+                  objectFit: 'contain',
+                  display: 'block',
+                  filter: theme === 'dark' ? 'brightness(1.1)' : 'none',
+                }}
+              />
+            </div>
+
+            {/* Accent rule */}
+            <div style={{ width:28, height:1, background: T.accent, marginBottom:18 }} />
+
+            <p style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontWeight: 300,
+              fontSize: 12.5,
+              color: T.text,
+              lineHeight: 1.80,
+              maxWidth: 254,
+              marginBottom: 26,
+            }}>
+              {t.description}
+            </p>
+
+            {/* Social icons */}
+            <div style={{ display:'flex', gap:8 }}>
+              {SOCIALS.map(({ label, href, icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ft-social"
+                  aria-label={label}
+                >
+                  {icon(13)}
+                </a>
+              ))}
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {SOCIALS.map((s) => (
-              <a
-                key={s.label}
-                href={s.href}
-                aria-label={s.label}
-                className="social-btn"
-              >
-                {s.abbr}
-              </a>
+
+          {/* COL 2 — Products (hidden on mobile/tablet) */}
+          <div className="ft-products-col">
+            <span className="ft-label">{t.products}</span>
+            {t.productList.map(name => (
+              <Link key={name} href={getLocalizedHref('/products')} prefetch={false} className="ft-link">{name}</Link>
             ))}
           </div>
-        </div>
 
-        {/* ── MAIN GRID ── */}
-        <div
-          style={{
-            maxWidth: 1280,
-            margin: '0 auto',
-            padding: '36px 40px 28px',
-          }}
-        >
-          <div className="ft-grid">
-            {/* COL 1 — Brand + newsletter */}
-            <div>
-              <p
-                style={{
-                  fontFamily: "'Barlow',sans-serif",
-                  fontSize: 11,
-                  color: T.bodyText,
-                  lineHeight: 1.75,
-                  fontWeight: 300,
-                  marginBottom: 18,
-                  maxWidth: 280,
-                }}
-              >
-                Premium-grade food staples from Central Asia. Quality certified
-                & trusted globally.
-              </p>
+          {/* COL 3 — Company */}
+          <div>
+            <span className="ft-label">{t.company}</span>
+            {NAV.map(({ name, href }) => (
+              <Link key={name} href={getLocalizedHref(href)} prefetch={false} className="ft-link">{name}</Link>
+            ))}
+          </div>
 
-              <p
-                style={{
-                  fontFamily: "'Barlow',sans-serif",
-                  fontSize: 9,
-                  fontWeight: 600,
-                  letterSpacing: '0.35em',
-                  textTransform: 'uppercase',
-                  color: T.accent,
-                  marginBottom: 10,
-                }}
-              >
-                Updates
-              </p>
-
-              {subbed ? (
-                <div
-                  className="sub-in"
-                  style={{ display: 'flex', alignItems: 'center', gap: 10 }}
-                >
-                  <div
-                    style={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: '50%',
-                      background: T.successBg,
-                      border: `1px solid ${T.successBorder}`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 12,
-                    }}
-                  >
-                    ✓
-                  </div>
-                  <p
-                    style={{
-                      fontFamily: "'Barlow',sans-serif",
-                      fontSize: 10,
-                      color: T.successText,
-                    }}
-                  >
-                    Subscribed!
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      background: T.inputBg,
-                      border: `1px solid ${subError ? T.inputBorderErr : T.inputBorder}`,
-                      borderRadius: 8,
-                      padding: '2px 6px 2px 12px',
-                      transition: 'border-color 0.18s',
-                    }}
-                  >
-                    <input
-                      className="nl-input"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value)
-                        setSubError(false)
-                      }}
-                      onKeyDown={(e) => e.key === 'Enter' && handleSub()}
-                    />
-                    <button className="nl-btn" onClick={handleSub}>
-                      Go
-                    </button>
-                  </div>
-                  {subError && (
-                    <p
-                      style={{
-                        fontFamily: "'Barlow',sans-serif",
-                        fontSize: 10,
-                        color: T.errorText,
-                        marginTop: 4,
-                      }}
-                    >
-                      ⚠ Valid email
-                    </p>
-                  )}
-                </>
-              )}
-            </div>
-
-            {/* COL 2 — Products */}
-            <div>
-              <p
-                style={{
-                  fontFamily: "'Barlow',sans-serif",
-                  fontSize: 9,
-                  fontWeight: 600,
-                  letterSpacing: '0.35em',
-                  textTransform: 'uppercase',
-                  color: T.accent,
-                  marginBottom: 12,
-                }}
-              >
-                Products
-              </p>
-              {PRODUCTS.slice(0, 4).map((p) => (
-                <Link key={p.name} href={p.href} className="ft-link">
-                  {p.name}
-                </Link>
-              ))}
-            </div>
-
-            {/* COL 3 — Company */}
-            <div>
-              <p
-                style={{
-                  fontFamily: "'Barlow',sans-serif",
-                  fontSize: 9,
-                  fontWeight: 600,
-                  letterSpacing: '0.35em',
-                  textTransform: 'uppercase',
-                  color: T.accent,
-                  marginBottom: 12,
-                }}
-              >
-                Links
-              </p>
-              {COMPANY.slice(0, 4).map((c) => (
-                <Link key={c.name} href={c.href} className="ft-link">
-                  {c.name}
-                </Link>
-              ))}
-            </div>
-
-            {/* COL 4 — Contact (simplified) */}
-            <div>
-              <p
-                style={{
-                  fontFamily: "'Barlow',sans-serif",
-                  fontSize: 9,
-                  fontWeight: 600,
-                  letterSpacing: '0.35em',
-                  textTransform: 'uppercase',
-                  color: T.accent,
-                  marginBottom: 12,
-                }}
-              >
-                Contact
-              </p>
-              {CONTACT.slice(0, 3).map(({ icon, label }) => (
-                <div
+          {/* COL 4 — Contact */}
+          <div>
+            <span className="ft-label">{t.contact}</span>
+            {CONTACT.map(({ label, href }) =>
+              href ? (
+                <a
                   key={label}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: 7,
-                    marginBottom: 8,
-                  }}
+                  href={href}
+                  className="ft-link"
+                  target={href.startsWith('http') ? '_blank' : undefined}
+                  rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
                 >
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: T.iconColor,
-                      marginTop: 1,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {icon}
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: "'Barlow',sans-serif",
-                      fontSize: 11,
-                      color: T.hoursText,
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    {label}
-                  </span>
-                </div>
-              ))}
-            </div>
+                  {label}
+                </a>
+              ) : (
+                <span key={label} style={{
+                  display: 'block',
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: 12.5,
+                  color: T.text,
+                  padding: '3.5px 0',
+                  lineHeight: 1.65,
+                }}>{label}</span>
+              )
+            )}
           </div>
-        </div>
 
-        {/* ── DIVIDER ── */}
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 40px' }}>
-          <div style={{ height: 1, background: T.divider }} />
         </div>
+      </div>
 
-        {/* ── BOTTOM BAR ── */}
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '14px 40px' }}>
-          <div className="ft-bottom">
-            <span
-              style={{
-                fontFamily: "'Barlow',sans-serif",
-                fontSize: 9,
-                color: T.dimText,
-              }}
-            >
-              © {new Date().getFullYear()} Asort. All rights reserved.
+      {/* ── BOTTOM BAR ── */}
+      <div style={{ borderTop:`1px solid ${T.divider}` }}>
+        <div style={{ maxWidth:1280, margin:'0 auto', padding:'15px 48px' }}>
+          <div
+            className="ft-bottom-bar"
+            style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:10 }}
+          >
+            <span style={{ fontFamily:"'DM Sans', sans-serif", fontSize:11, color: T.dim }}>
+              © {new Date().getFullYear()} {t.rights}
             </span>
-
-            <div
-              style={{
-                display: 'flex',
-                gap: 20,
-                flexWrap: 'wrap',
-                alignItems: 'center',
-              }}
-            >
-              {[
-                { v: '8', l: 'Products' },
-                { v: '40+', l: 'Countries' },
-              ].map(({ v, l }) => (
-                <div
-                  key={l}
-                  style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "'Barlow Condensed',sans-serif",
-                      fontWeight: 900,
-                      fontSize: 14,
-                      color: T.statNum,
-                    }}
-                  >
-                    {v}
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: "'Barlow',sans-serif",
-                      fontSize: 8,
-                      letterSpacing: '0.22em',
-                      textTransform: 'uppercase',
-                      color: T.statLabel,
-                    }}
-                  >
-                    {l}
-                  </span>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
-      </footer>
-    </>
+      </div>
+
+    </footer>
   )
 }

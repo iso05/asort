@@ -1,0 +1,24 @@
+# 1. Custom 404 Page redirection (Next.js static export fallback)
+ErrorDocument 404 /404.html
+
+# 2. Rewrite rules for clean URLs (handles sub-directories and route refreshes)
+RewriteEngine On
+RewriteBase /
+
+# Exclude existing files, directories, and the 404.html itself from being rewritten
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d [OR]
+RewriteCond %{REQUEST_URI} ^/404\.html$
+RewriteRule ^ - [L]
+
+# Check if there's a folder/index.html for the clean URL (e.g. /uz/news/ -> /uz/news/index.html)
+RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}index.html -f
+RewriteRule ^(.*)$ %{REQUEST_URI}index.html [L]
+
+# Check if there's a folder/index.html without a trailing slash (e.g. /uz/news -> /uz/news/index.html)
+RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}/index.html -f
+RewriteRule ^(.*)$ %{REQUEST_URI}/index.html [L]
+
+# Fallback to custom 404.html page for any other non-existent route
+RewriteRule ^(.*)$ /404.html [L]
+

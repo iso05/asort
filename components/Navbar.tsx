@@ -7,14 +7,15 @@ import { useTheme } from './ThemeContext'
 import { useHomeColor } from './HomeColorContext'
 import { useLanguage } from './LanguageContext'
 
-const NAV_LINKS = [
-  { label: 'Home', href: '/' },
-  { label: 'About', href: '/about' },
-  { label: 'Products', href: '/products' },
-  { label: 'News', href: '/news' },
-  { label: 'Partners', href: '/partners' },
-  { label: 'Contact', href: '/contact' },
-]
+const NAV_LABELS: Record<'uz' | 'ru' | 'en', string[]> = {
+  uz: ['Bosh sahifa', 'Biz haqimizda', 'Mahsulotlar', 'Yangiliklar', 'Hamkorlar', 'Aloqa'],
+  ru: ['Главная', 'О нас', 'Продукты', 'Новости', 'Партнёры', 'Контакты'],
+  en: ['Home', 'About Us', 'Products', 'News', 'Partners', 'Contact'],
+}
+const NAV_HREFS = ['/', '/about', '/products', '/news', '/partners', '/contact']
+
+const getNavLinks = (lang: 'uz' | 'ru' | 'en') =>
+  NAV_HREFS.map((href, i) => ({ label: NAV_LABELS[lang][i], href }))
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -24,7 +25,12 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
-  const isHome = pathname === '/'
+  const isHome = pathname === `/${language}` || pathname === `/${language}/`
+
+  const getLocalizedHref = (href: string) => {
+    if (href === '/') return `/${language}/`
+    return `/${language}${href}`
+  }
 
   useEffect(() => {
     const onScroll = () => {
@@ -42,46 +48,32 @@ export default function Navbar() {
 
   // ── Navbar bg logic ──────────────────────────────────────────────
   // Home:        colored bg based on product (if homeColor is set)
-  // Light mode:  transparent → light blue on scroll for readability
-  // Dark mode:   transparent → dark blue on scroll
+  // Inner pages: transparent → light warm ivory on scroll for readability
   const navBg = isHome
     ? homeColor
       ? homeColor.bg
       : 'transparent'
     : scrolled
-      ? theme === 'dark'
-        ? 'rgba(15, 23, 41, 0.97)' // dark blue
-        : 'rgba(255, 255, 255, 0.95)' // white in light mode
-      : 'transparent' // transparent before scroll
+      ? 'rgba(253, 251, 247, 0.95)'
+      : 'transparent'
 
-  const drawerBg =
-    theme === 'dark' ? 'rgba(15, 23, 41, 0.98)' : 'rgba(240, 245, 250, 0.97)'
-  const borderCol = scrolled
-    ? theme === 'dark'
-      ? 'rgba(100,200,255,0.15)'
-      : 'rgba(100,150,200,0.15)'
-    : 'transparent'
+  const drawerBg = 'rgba(253, 251, 247, 0.98)'
+  const borderCol = scrolled ? '#E6E1D8' : 'transparent'
   const linkColorActive = isHome
     ? homeColor
       ? homeColor.text
-      : '#64C8FF'
-    : theme === 'dark'
-      ? '#64C8FF'
-      : '#2c5aa0'
+      : '#2D5F3E'
+    : '#2D5F3E'
   const linkColorBase = isHome
     ? homeColor
       ? `${homeColor.text}80`
-      : 'rgba(255,255,255,0.48)'
-    : theme === 'dark'
-      ? 'rgba(255,255,255,0.7)'
-      : 'rgba(60,80,100,0.7)'
+      : 'rgba(30, 37, 32, 0.48)'
+    : 'rgba(30, 37, 32, 0.65)'
   const linkColorHover = isHome
     ? homeColor
       ? homeColor.text
-      : 'rgba(255,255,255,0.9)'
-    : theme === 'dark'
-      ? 'rgba(255,255,255,0.95)'
-      : 'rgba(40,60,90,0.95)'
+      : 'rgba(30, 37, 32, 0.9)'
+    : '#1E2520'
 
   return (
     <>
@@ -121,14 +113,14 @@ export default function Navbar() {
           font-family: 'Barlow', sans-serif;
           font-size: 13px; font-weight: 500;
           letter-spacing: 0.2em; text-transform: uppercase;
-          color: ${linkColorBase};
+          color: rgba(30, 37, 32, 0.65);
           text-decoration: none;
           display: flex; align-items: center; justify-content: space-between;
           padding: 16px 28px;
           transition: background 0.15s, color 0.15s;
         }
-        .mob-lnk:hover  { background: ${theme === 'dark' ? 'rgba(100,200,255,0.08)' : 'rgba(100,150,200,0.08)'}; color: ${linkColorHover}; }
-        .mob-lnk.act    { color: ${linkColorActive}; background: ${theme === 'dark' ? 'rgba(100,200,255,0.12)' : 'rgba(100,150,200,0.1)'}; }
+        .mob-lnk:hover  { background: rgba(100, 150, 200, 0.08); color: #1E2520; }
+        .mob-lnk.act    { color: #2D5F3E; background: rgba(100, 150, 200, 0.10); }
         .mob-lnk .arrow { opacity: 0.22; font-size: 13px; transition: transform 0.18s; }
         .mob-lnk:hover .arrow { transform: translateX(4px); opacity: 0.5; }
 
@@ -157,8 +149,34 @@ export default function Navbar() {
           .desk { display: none  !important; }
           .mob  { display: flex  !important; }
           .logo-text { font-size: 14px !important; letter-spacing: 0.15em !important; }
+          .nav-container { padding: 0 16px !important; }
         }
         @media (max-width: 1024px) and (min-width: 769px) { .nav-gap { gap: 22px !important; } }
+
+        /* Logo — use element+class selector and !important to beat Tailwind global img reset */
+        img.nav-logo-img {
+          height: 56px !important;
+          width: 175px !important;
+          min-width: 175px !important;
+          max-width: 175px !important;
+          min-height: 56px !important;
+          max-height: 56px !important;
+          object-fit: contain !important;
+          display: block !important;
+          flex-shrink: 0 !important;
+          transition: none;
+        }
+        @media (max-width: 768px) {
+          img.nav-logo-img {
+            height: 48px !important;
+            width: 150px !important;
+            min-width: 150px !important;
+            max-width: 150px !important;
+            min-height: 48px !important;
+            max-height: 48px !important;
+            object-fit: contain !important;
+          }
+        }
       `}</style>
 
       <nav
@@ -175,7 +193,7 @@ export default function Navbar() {
             'background 0.35s ease, backdrop-filter 0.35s ease, border-color 0.35s ease',
         }}
       >
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 40px' }}>
+        <div className="nav-container" style={{ maxWidth: 1280, margin: '0 auto', padding: '0 40px' }}>
           <div
             style={{
               display: 'flex',
@@ -186,7 +204,8 @@ export default function Navbar() {
           >
             {/* LOGO */}
             <Link
-              href="/"
+              href={getLocalizedHref('/')}
+              prefetch={false}
               style={{
                 textDecoration: 'none',
                 display: 'flex',
@@ -196,12 +215,15 @@ export default function Navbar() {
               }}
             >
               <img
-                src="/images/logo.png"
+                src="/images/logo.webp"
                 alt="Asort Logo"
+                className="nav-logo-img"
                 style={{
-                  height: 100,
-                  width: 'auto',
+                  height: 56,
+                  width: 175,
                   objectFit: 'contain',
+                  display: 'block',
+                  flexShrink: 0,
                 }}
                 onError={(e) => {
                   ;(e.target as HTMLImageElement).style.display = 'none'
@@ -214,202 +236,87 @@ export default function Navbar() {
               className="desk nav-gap"
               style={{ gap: 32, alignItems: 'center' }}
             >
-              {NAV_LINKS.map(({ label, href }) => (
+              {getNavLinks(language).map(({ label, href }) => (
                 <Link
                   key={href}
-                  href={href}
-                  className={`nav-lnk ${pathname === href ? 'act' : ''}`}
+                  href={getLocalizedHref(href)}
+                  prefetch={false}
+                  className={`nav-lnk ${pathname === getLocalizedHref(href) ? 'act' : ''}`}
                 >
                   {label}
                 </Link>
               ))}
             </div>
 
-            {/* RIGHT: theme toggle + language switcher */}
+            {/* RIGHT: language switcher */}
             <div
               className="desk"
               style={{ alignItems: 'center', gap: 16, flexShrink: 0 }}
             >
-              {!isHome && (
-                <>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 6,
+                  background: isHome ? 'rgba(255, 255, 255, 0.08)' : 'rgba(45, 95, 62, 0.08)',
+                  border: isHome ? '1px solid rgba(255, 255, 255, 0.18)' : '1px solid rgba(45, 95, 62, 0.18)',
+                  borderRadius: 10,
+                  padding: '6px 10px',
+                  flexShrink: 0,
+                }}
+              >
+                {['EN', 'RU', 'UZ'].map((lang) => (
                   <button
-                    onClick={toggle}
-                    className="theme-btn"
-                    aria-label={`Switch to ${String(theme) === 'light' ? 'dark' : 'light'} mode`}
-                  >
-                    {String(theme) === 'light' ? (
-                      <svg
-                        width="15"
-                        height="15"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke={
-                          String(theme) === 'light'
-                            ? '#333333'
-                            : 'rgba(255,220,140,0.75)'
-                        }
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                      </svg>
-                    ) : (
-                      <svg
-                        width="15"
-                        height="15"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke={
-                          String(theme) === 'light'
-                            ? '#333333'
-                            : 'rgba(255,220,140,0.9)'
-                        }
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <circle cx="12" cy="12" r="5" />
-                        <line x1="12" y1="1" x2="12" y2="3" />
-                        <line x1="12" y1="21" x2="12" y2="23" />
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                        <line x1="1" y1="12" x2="3" y2="12" />
-                        <line x1="21" y1="12" x2="23" y2="12" />
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                      </svg>
-                    )}
-                  </button>
-
-                  {/* Language Switcher */}
-                  <div
+                    key={lang}
+                    onClick={() =>
+                      setLanguage(lang.toLowerCase() as 'en' | 'ru' | 'uz')
+                    }
                     style={{
-                      display: 'flex',
-                      gap: 6,
                       background:
-                        theme === 'dark'
-                          ? 'rgba(100,200,255,0.08)'
-                          : 'rgba(100,150,200,0.08)',
-                      border: `1px solid ${theme === 'dark' ? 'rgba(100,200,255,0.20)' : 'rgba(100,150,200,0.18)'}`,
-                      borderRadius: 10,
-                      padding: '6px 10px',
-                      flexShrink: 0,
+                        language === lang.toLowerCase()
+                          ? isHome
+                            ? 'rgba(255, 255, 255, 0.15)'
+                            : 'rgba(45, 95, 62, 0.15)'
+                          : 'transparent',
+                      color:
+                        language === lang.toLowerCase()
+                          ? isHome
+                            ? '#FFFFFF'
+                            : '#2D5F3E'
+                          : isHome
+                            ? 'rgba(255, 255, 255, 0.65)'
+                            : 'rgba(30, 37, 32, 0.55)',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: 10,
+                      fontWeight: 600,
+                      letterSpacing: '0.1em',
+                      padding: '4px 8px',
+                      borderRadius: 6,
+                      transition: 'all 0.2s ease',
+                      fontFamily: "'Barlow', sans-serif",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = isHome ? '#FFFFFF' : '#1E2520'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color =
+                        language === lang.toLowerCase()
+                          ? isHome
+                            ? '#FFFFFF'
+                            : '#2D5F3E'
+                          : isHome
+                            ? 'rgba(255, 255, 255, 0.65)'
+                            : 'rgba(30, 37, 32, 0.55)'
                     }}
                   >
-                    {['EN', 'RU', 'UZ'].map((lang) => (
-                      <button
-                        key={lang}
-                        onClick={() =>
-                          setLanguage(lang.toLowerCase() as 'en' | 'ru' | 'uz')
-                        }
-                        style={{
-                          background:
-                            language === lang.toLowerCase()
-                              ? theme === 'dark'
-                                ? 'rgba(100,200,255,0.2)'
-                                : 'rgba(100,150,200,0.15)'
-                              : 'transparent',
-                          color:
-                            language === lang.toLowerCase()
-                              ? theme === 'dark'
-                                ? '#64C8FF'
-                                : '#2c5aa0'
-                              : theme === 'dark'
-                                ? 'rgba(255,255,255,0.5)'
-                                : 'rgba(100,150,200,0.55)',
-                          border: 'none',
-                          cursor: 'pointer',
-                          fontSize: 10,
-                          fontWeight: 600,
-                          letterSpacing: '0.1em',
-                          padding: '4px 8px',
-                          borderRadius: 6,
-                          transition: 'all 0.2s ease',
-                          fontFamily: "'Barlow', sans-serif",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color =
-                            theme === 'dark'
-                              ? 'rgba(255,255,255,0.8)'
-                              : 'rgba(100,150,200,0.85)'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color =
-                            language === lang.toLowerCase()
-                              ? theme === 'dark'
-                                ? '#64C8FF'
-                                : '#2c5aa0'
-                              : theme === 'dark'
-                                ? 'rgba(255,255,255,0.5)'
-                                : 'rgba(100,150,200,0.55)'
-                        }}
-                      >
-                        {lang}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
+                    {lang}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* MOBILE RIGHT: theme toggle + hamburger */}
+            {/* MOBILE RIGHT: hamburger */}
             <div className="mob" style={{ alignItems: 'center', gap: 10 }}>
-              {!isHome && (
-                <button
-                  onClick={toggle}
-                  className="theme-btn"
-                  aria-label="Toggle theme"
-                >
-                  {theme === 'light' ? (
-                    <svg
-                      width="15"
-                      height="15"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke={
-                        isHome
-                          ? '#ffffff'
-                          : theme === 'light'
-                            ? '#000000'
-                            : '#ffffff'
-                      }
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                    </svg>
-                  ) : (
-                    <svg
-                      width="15"
-                      height="15"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke={
-                        isHome
-                          ? '#ffffff'
-                          : theme === 'light'
-                            ? '#000000'
-                            : '#ffffff'
-                      }
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <circle cx="12" cy="12" r="5" />
-                      <line x1="12" y1="1" x2="12" y2="3" />
-                      <line x1="12" y1="21" x2="12" y2="23" />
-                      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                      <line x1="1" y1="12" x2="3" y2="12" />
-                      <line x1="21" y1="12" x2="23" y2="12" />
-                      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                    </svg>
-                  )}
-                </button>
-              )}
               <button
                 onClick={() => setMenuOpen((prev) => !prev)}
                 aria-label={menuOpen ? 'Close menu' : 'Open menu'}
@@ -426,11 +333,13 @@ export default function Navbar() {
                 <span
                   className="hbar"
                   style={{
-                    background: isHome
-                      ? '#ffffff'
-                      : theme === 'light'
-                        ? '#000000'
-                        : '#ffffff',
+                    background: menuOpen
+                      ? '#000000'
+                      : isHome
+                        ? '#ffffff'
+                        : theme === 'light'
+                          ? '#000000'
+                          : '#ffffff',
                     transform: menuOpen
                       ? 'rotate(44deg) translate(4.5px, 5px)'
                       : 'none',
@@ -439,11 +348,13 @@ export default function Navbar() {
                 <span
                   className="hbar"
                   style={{
-                    background: isHome
-                      ? '#ffffff'
-                      : theme === 'light'
-                        ? '#000000'
-                        : '#ffffff',
+                    background: menuOpen
+                      ? '#000000'
+                      : isHome
+                        ? '#ffffff'
+                        : theme === 'light'
+                          ? '#000000'
+                          : '#ffffff',
                     opacity: menuOpen ? 0 : 1,
                     transform: menuOpen ? 'scaleX(0)' : 'none',
                   }}
@@ -451,11 +362,13 @@ export default function Navbar() {
                 <span
                   className="hbar"
                   style={{
-                    background: isHome
-                      ? '#ffffff'
-                      : theme === 'light'
-                        ? '#000000'
-                        : '#ffffff',
+                    background: menuOpen
+                      ? '#000000'
+                      : isHome
+                        ? '#ffffff'
+                        : theme === 'light'
+                          ? '#000000'
+                          : '#ffffff',
                     transform: menuOpen
                       ? 'rotate(-44deg) translate(4.5px, -5px)'
                       : 'none',
@@ -478,18 +391,17 @@ export default function Navbar() {
               boxShadow: '0 16px 40px rgba(0,0,0,0.4)',
             }}
           >
-            {NAV_LINKS.map(({ label, href }, i) => (
+            {getNavLinks(language).map(({ label, href }, i) => (
               <Link
                 key={href}
-                href={href}
-                className={`mob-lnk ${pathname === href ? 'act' : ''}`}
+                href={getLocalizedHref(href)}
+                prefetch={false}
+                className={`mob-lnk ${pathname === getLocalizedHref(href) ? 'act' : ''}`}
                 onClick={() => setMenuOpen(false)}
                 style={{
                   borderBottom:
-                    i < NAV_LINKS.length - 1
-                      ? theme === 'dark'
-                        ? '1px solid rgba(255,200,100,0.05)'
-                        : '1px solid rgba(100,150,200,0.08)'
+                    i < NAV_HREFS.length - 1
+                      ? '1px solid rgba(45, 95, 62, 0.08)'
                       : 'none',
                 }}
               >
@@ -497,163 +409,70 @@ export default function Navbar() {
                 <span className="arrow">→</span>
               </Link>
             ))}
-            {!isHome && (
-              <div
-                style={{
-                  padding: '14px 28px',
-                  borderTop:
-                    theme === 'dark'
-                      ? '1px solid rgba(255,200,100,0.05)'
-                      : '1px solid rgba(100,150,200,0.08)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "'Barlow', sans-serif",
-                    fontSize: 10,
-                    letterSpacing: '0.2em',
-                    textTransform: 'uppercase',
-                    color:
-                      theme === 'dark'
-                        ? 'rgba(255,200,100,0.3)'
-                        : 'rgba(100,150,200,0.4)',
-                  }}
-                >
-                  {theme === 'light' ? 'Light Mode' : 'Dark Mode'}
-                </span>
-                <button
-                  onClick={() => {
-                    toggle()
-                    setMenuOpen(false)
-                  }}
-                  className="theme-btn"
-                >
-                  {theme === 'light' ? (
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke={
-                        theme === 'light' ? '#333333' : 'rgba(255,220,140,0.7)'
-                      }
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                    </svg>
-                  ) : (
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke={
-                        theme === 'dark' ? 'rgba(255,220,140,0.85)' : '#333333'
-                      }
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <circle cx="12" cy="12" r="5" />
-                      <line x1="12" y1="1" x2="12" y2="3" />
-                      <line x1="12" y1="21" x2="12" y2="23" />
-                      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                      <line x1="1" y1="12" x2="3" y2="12" />
-                      <line x1="21" y1="12" x2="23" y2="12" />
-                      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            )}
 
             {/* Mobile Language Switcher */}
-            {!isHome && (
-              <div
+            <div
+              style={{
+                padding: '14px 28px',
+                borderTop: '1px solid rgba(45, 95, 62, 0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <span
                 style={{
-                  padding: '14px 28px',
-                  borderTop:
-                    theme === 'dark'
-                      ? '1px solid rgba(255,200,100,0.05)'
-                      : '1px solid rgba(100,150,200,0.08)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
+                  fontFamily: "'Barlow', sans-serif",
+                  fontSize: 10,
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(30, 37, 32, 0.45)',
                 }}
               >
-                <span
-                  style={{
-                    fontFamily: "'Barlow', sans-serif",
-                    fontSize: 10,
-                    letterSpacing: '0.2em',
-                    textTransform: 'uppercase',
-                    color:
-                      theme === 'dark'
-                        ? 'rgba(255,200,100,0.3)'
-                        : 'rgba(100,150,200,0.4)',
-                  }}
-                >
-                  Language
-                </span>
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: 4,
-                    background:
-                      theme === 'dark'
-                        ? 'rgba(100,200,255,0.08)'
-                        : 'rgba(100,150,200,0.08)',
-                    border: `1px solid ${theme === 'dark' ? 'rgba(100,200,255,0.20)' : 'rgba(100,150,200,0.18)'}`,
-                    borderRadius: 8,
-                    padding: '4px 6px',
-                  }}
-                >
-                  {['EN', 'RU', 'UZ'].map((lang) => (
-                    <button
-                      key={lang}
-                      onClick={() => {
-                        setLanguage(lang.toLowerCase() as 'en' | 'ru' | 'uz')
-                        setMenuOpen(false)
-                      }}
-                      style={{
-                        background:
-                          language === lang.toLowerCase()
-                            ? theme === 'dark'
-                              ? 'rgba(100,200,255,0.2)'
-                              : 'rgba(100,150,200,0.15)'
-                            : 'transparent',
-                        color:
-                          language === lang.toLowerCase()
-                            ? theme === 'dark'
-                              ? '#64C8FF'
-                              : '#2c5aa0'
-                            : theme === 'dark'
-                              ? 'rgba(255,255,255,0.5)'
-                              : 'rgba(100,150,200,0.55)',
-                        border: 'none',
-                        cursor: 'pointer',
-                        fontSize: 9,
-                        fontWeight: 600,
-                        letterSpacing: '0.1em',
-                        padding: '3px 6px',
-                        borderRadius: 5,
-                        fontFamily: "'Barlow', sans-serif",
-                        transition: 'all 0.2s ease',
-                      }}
-                    >
-                      {lang}
-                    </button>
-                  ))}
-                </div>
+                Til / Язык / Language
+              </span>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 4,
+                  background: 'rgba(45, 95, 62, 0.08)',
+                  border: '1px solid rgba(45, 95, 62, 0.18)',
+                  borderRadius: 8,
+                  padding: '4px 6px',
+                }}
+              >
+                {['EN', 'RU', 'UZ'].map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => {
+                      setLanguage(lang.toLowerCase() as 'en' | 'ru' | 'uz')
+                      setMenuOpen(false)
+                    }}
+                    style={{
+                      background:
+                        language === lang.toLowerCase()
+                          ? 'rgba(45, 95, 62, 0.15)'
+                          : 'transparent',
+                      color:
+                        language === lang.toLowerCase()
+                          ? '#2D5F3E'
+                          : 'rgba(30, 37, 32, 0.55)',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: 9,
+                      fontWeight: 600,
+                      letterSpacing: '0.1em',
+                      padding: '3px 6px',
+                      borderRadius: 5,
+                      fontFamily: "'Barlow', sans-serif",
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    {lang}
+                  </button>
+                ))}
               </div>
-            )}
+            </div>
             <div
               style={{
                 padding: '12px 28px',
